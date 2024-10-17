@@ -1,0 +1,313 @@
+{
+	"info": {
+		"_postman_id": "425ef2be-c611-4317-93da-59efe0dd6253",
+		"name": "reqres-api-validations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39088005"
+	},
+	"item": [
+		{
+			"name": "POST Create a new user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"CREATE user - status code validation\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"    \r",
+							"});\r",
+							"\r",
+							"pm.test(\"Create User - response variable values validation\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.id).is.not.empty;\r",
+							"    pm.environment.set(\"dynamicUserId\", jsonData.id)\r",
+							"    pm.expect(jsonData.name).length.greaterThan(1);\r",
+							"    pm.expect(jsonData.job).length.greaterThan(2);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    //https://learning.postman.com/docs/tests-and-scripts/write-scripts/variables-list/\r\n    \"name\": \"{{$randomFullName}}\",\r\n    \"job\": \"{{$randomJobTitle}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://reqres.in/api/users",
+					"protocol": "https",
+					"host": [
+						"reqres",
+						"in"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET get user by id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//Retrieving this user eg: 717 when we dynamically add record - is giving {} - empty response thus fails below validations. Seems a bug / delay in saving records in respective database.\r",
+							"\r",
+							"pm.test(\"Get User by userId -status code validation\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"Get User by userId - response fields validation\", function () {\r",
+							"    console.log(pm.response.text())\r",
+							"    pm.expect(pm.response.text()).to.include(\"first_name\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Get User by userId - response field: email validation\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.data.email).to.contain(\"@reqres.in\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Get User by userId - response field: avatar negative validation\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.data.avatar).to.not.contain(\"http://\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://reqres.in/api/users/{{dynamicUserId}}",
+					"protocol": "https",
+					"host": [
+						"reqres",
+						"in"
+					],
+					"path": [
+						"api",
+						"users",
+						"{{dynamicUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT update a user by id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Put - Update existing user record- validate response\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.expect(pm.response.text()).to.include(\"updatedAt\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{$randomFullName}}\",\r\n    \"job\": \"{{$randomJobTitle}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://reqres.in/api/users/{{dynamicUserId}}",
+					"protocol": "https",
+					"host": [
+						"reqres",
+						"in"
+					],
+					"path": [
+						"api",
+						"users",
+						"{{dynamicUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PATCH update partial user record by  id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Patch - Partial user record update response validation\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.expect(pm.response.text()).to.include(\"updatedAt\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"job\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Patch - partial user record update - negative field validation\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.name).undefined;\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"job\": \"{{$randomJobTitle}}\"//partial update for user record\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://reqres.in/api/users/{{dynamicUserId}}",
+					"protocol": "https",
+					"host": [
+						"reqres",
+						"in"
+					],
+					"path": [
+						"api",
+						"users",
+						"{{dynamicUserId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET  Get List Of Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"GET List of Users - response validation\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.expect(jsonData.data.length).is.greaterThan(0);//user list is not empty\r",
+							"    pm.environment.set(\"userIdToDelete\", jsonData.data[0].id);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://reqres.in/api/users",
+					"protocol": "https",
+					"host": [
+						"reqres",
+						"in"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DEL Delete user by id ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Delete user record by id - validate status code\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});// We can additionally enhance to validate making a call with userIdToDelete to get user and make sure its empty as additonal validation."
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://reqres.in/api/users/{{userIdToDelete}}",
+					"protocol": "https",
+					"host": [
+						"reqres",
+						"in"
+					],
+					"path": [
+						"api",
+						"users",
+						"{{userIdToDelete}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
